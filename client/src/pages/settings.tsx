@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { 
   Shield, 
   Lock, 
-  Settings, 
+  Settings as SettingsIcon, 
   LogOut,
   Fingerprint,
   Trash2,
@@ -55,7 +55,7 @@ export default function Settings() {
         <Tabs defaultValue="account" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="account" data-testid="tab-account">
-              <Settings className="mr-2 h-4 w-4" />
+              <SettingsIcon className="mr-2 h-4 w-4" />
               Account
             </TabsTrigger>
             <TabsTrigger value="security" data-testid="tab-security">

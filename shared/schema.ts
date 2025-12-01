@@ -29,6 +29,8 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  hashedPassword: text("hashed_password"), // For username/password auth
+  authProvider: varchar("auth_provider").default("replit"), // "replit" or "local"
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

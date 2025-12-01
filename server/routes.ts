@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { registerLocalUser, loginLocalUser } from "./localAuth";
 import { z } from "zod";
 import crypto from "crypto";
 
@@ -27,6 +28,51 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   await setupAuth(app);
+
+  app.post("/api/auth/register", async (req: any, res) => {
+    try {
+      const { email, password, firstName, lastName } = req.body;
+      
+      const user = await registerLocalUser({
+        email,
+        password,
+        firstName,
+        lastName,
+      });
+
+      req.login(user, (err) => {
+        if (err) {
+          return res.status(500).json({ message: "Login failed" });
+        }
+        res.status(201).json(user);
+      });
+    } catch (error: any) {
+      const message = error.message || "Registration failed";
+      res.status(400).json({ message });
+    }
+  });
+
+  app.post("/api/auth/login", async (req: any, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password required" });
+      }
+
+      const user = await loginLocalUser(email, password);
+
+      req.login(user, (err) => {
+        if (err) {
+          return res.status(500).json({ message: "Login failed" });
+        }
+        res.json(user);
+      });
+    } catch (error: any) {
+      const message = error.message || "Login failed";
+      res.status(401).json({ message });
+    }
+  });
 
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {

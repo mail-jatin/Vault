@@ -7,7 +7,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
+import Auth from "@/pages/auth";
 import Home from "@/pages/home";
+import Settings from "@/pages/settings";
 import { Loader2 } from "lucide-react";
 
 function LoadingScreen() {
@@ -31,10 +33,14 @@ function Router() {
   return (
     <Switch>
       {!isAuthenticated ? (
-        <Route path="/" component={Landing} />
+        <>
+          <Route path="/" component={Landing} />
+          <Route path="/auth" component={Auth} />
+        </>
       ) : (
         <>
           <Route path="/" component={Home} />
+          <Route path="/settings" component={Settings} />
         </>
       )}
       <Route component={NotFound} />
@@ -42,17 +48,15 @@ function Router() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="securevault-theme">
-        <TooltipProvider>
-          <Toaster />
+      <TooltipProvider>
+        <ThemeProvider defaultTheme="system" storageKey="vault-theme">
           <Router />
-        </TooltipProvider>
-      </ThemeProvider>
+          <Toaster />
+        </ThemeProvider>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }
-
-export default App;

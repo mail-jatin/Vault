@@ -57,7 +57,7 @@ export default function Landing() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Button asChild data-testid="button-login">
-              <a href="/api/login">
+              <a href="/auth">
                 Sign In
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
@@ -88,7 +88,7 @@ export default function Landing() {
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                 <Button size="lg" asChild className="text-base" data-testid="button-get-started">
-                  <a href="/api/login">
+                  <a href="/auth">
                     Get Started Free
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </a>
@@ -207,7 +207,7 @@ export default function Landing() {
               Join thousands of users who trust SecureVault to keep their digital life safe.
             </p>
             <Button size="lg" asChild className="text-base" data-testid="button-start-now">
-              <a href="/api/login">
+              <a href="/auth">
                 Start Now - It's Free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>

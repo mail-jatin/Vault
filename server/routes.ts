@@ -44,7 +44,12 @@ export async function registerRoutes(
         if (err) {
           return res.status(500).json({ message: "Login failed" });
         }
-        res.status(201).json(user);
+        req.session.save((sessionErr) => {
+          if (sessionErr) {
+            return res.status(500).json({ message: "Session save failed" });
+          }
+          res.status(201).json(user);
+        });
       });
     } catch (error: any) {
       const message = error.message || "Registration failed";
@@ -66,7 +71,12 @@ export async function registerRoutes(
         if (err) {
           return res.status(500).json({ message: "Login failed" });
         }
-        res.json(user);
+        req.session.save((sessionErr) => {
+          if (sessionErr) {
+            return res.status(500).json({ message: "Session save failed" });
+          }
+          res.json(user);
+        });
       });
     } catch (error: any) {
       const message = error.message || "Login failed";
@@ -76,7 +86,7 @@ export async function registerRoutes(
 
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -87,7 +97,7 @@ export async function registerRoutes(
 
   app.get("/api/vault", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const entries = await storage.getVaultEntries(userId);
       res.json(entries);
     } catch (error) {
@@ -98,7 +108,7 @@ export async function registerRoutes(
 
   app.get("/api/vault/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const entry = await storage.getVaultEntry(req.params.id, userId);
       if (!entry) {
         return res.status(404).json({ message: "Entry not found" });
@@ -112,7 +122,7 @@ export async function registerRoutes(
 
   app.post("/api/vault", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const data = vaultEntrySchema.parse(req.body);
       
       const entry = await storage.createVaultEntry({
@@ -139,7 +149,7 @@ export async function registerRoutes(
 
   app.patch("/api/vault/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const data = vaultEntrySchema.partial().parse(req.body);
       
       const entry = await storage.updateVaultEntry(req.params.id, userId, data);
@@ -159,7 +169,7 @@ export async function registerRoutes(
 
   app.delete("/api/vault/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const success = await storage.deleteVaultEntry(req.params.id, userId);
       res.json({ success });
     } catch (error) {
@@ -170,7 +180,7 @@ export async function registerRoutes(
 
   app.get("/api/folders", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const folders = await storage.getFolders(userId);
       res.json(folders);
     } catch (error) {
@@ -181,7 +191,7 @@ export async function registerRoutes(
 
   app.post("/api/folders", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const data = folderSchema.parse(req.body);
       
       const folder = await storage.createFolder({
@@ -201,7 +211,7 @@ export async function registerRoutes(
 
   app.patch("/api/folders/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const data = folderSchema.partial().parse(req.body);
       
       const folder = await storage.updateFolder(req.params.id, userId, data);
@@ -221,7 +231,7 @@ export async function registerRoutes(
 
   app.delete("/api/folders/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const success = await storage.deleteFolder(req.params.id, userId);
       res.json({ success });
     } catch (error) {
@@ -232,7 +242,7 @@ export async function registerRoutes(
 
   app.post("/api/webauthn/register-challenge", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const challenge = crypto.randomBytes(32).toString("base64");
       webauthnChallenges.set(userId, { challenge, type: "register" });
       
@@ -247,7 +257,7 @@ export async function registerRoutes(
 
   app.post("/api/webauthn/register", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const { credential, deviceName } = req.body;
       
       const storedChallenge = webauthnChallenges.get(userId);
@@ -274,7 +284,7 @@ export async function registerRoutes(
 
   app.get("/api/webauthn/credentials", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const credentials = await storage.getWebauthnCredentials(userId);
       res.json(
         credentials.map((c) => ({
@@ -292,7 +302,7 @@ export async function registerRoutes(
 
   app.post("/api/webauthn/auth-challenge", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const credentials = await storage.getWebauthnCredentials(userId);
       
       if (credentials.length === 0) {
@@ -319,7 +329,7 @@ export async function registerRoutes(
 
   app.post("/api/webauthn/authenticate", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const { credential } = req.body;
       
       const storedChallenge = webauthnChallenges.get(userId);
